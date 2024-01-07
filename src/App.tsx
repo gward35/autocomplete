@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import './App.css'
 
 export interface AutoCompleteSuggestions {
@@ -6,8 +6,16 @@ export interface AutoCompleteSuggestions {
 }
 
 export const AutoComplete = ({ suggestions }: AutoCompleteSuggestions) => {
+  const [data, setData] = useState<string[]>(suggestions)
   const [search, setSearch] = useState<string>('')
   const [visible, setVisible] = useState<boolean>(false)
+
+  useEffect(() => {
+    const newData = suggestions.filter(d =>
+      d.toLocaleLowerCase().includes(search)
+    )
+    setData(newData)
+  }, [search, setData])
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setVisible(true)
@@ -92,9 +100,8 @@ export const AutoComplete = ({ suggestions }: AutoCompleteSuggestions) => {
             Suggestions
           </span>
           <ul style={{ padding: 0 }}>
-            {suggestions
-              .filter(s => s.toLocaleLowerCase().includes(search))
-              .map(s => (
+            {data.length > 0 ? (
+              data.map(s => (
                 <li
                   style={{
                     cursor: 'pointer',
@@ -107,7 +114,19 @@ export const AutoComplete = ({ suggestions }: AutoCompleteSuggestions) => {
                 >
                   {s}
                 </li>
-              ))}
+              ))
+            ) : (
+              <li
+                style={{
+                  textAlign: 'left',
+                  listStyle: 'none',
+                  marginBottom: '5px',
+                }}
+                key={crypto.randomUUID()}
+              >
+                No Suggestions
+              </li>
+            )}
           </ul>
         </div>
       )}
